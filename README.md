@@ -1,15 +1,15 @@
-# Cognifyz Full Stack Internship — Task 1
+# STUDY-TRACKER-APP
 
-## What This Does
+-> What This Does
 A Node.js + Express web app with server-side rendering using EJS.
 Users can register via a form, data is validated server-side, and stored in memory.
 
-## Tech Stack
+-> Tech Stack
 - **Node.js** — JavaScript runtime
 - **Express** — web framework
 - **EJS** — templating engine for server-side rendered HTML
 
-## Project Structure
+-> Project Structure
 ```
 cognifyz-app/
 ├── server.js          ← main server (routes, middleware, logic)
@@ -23,7 +23,7 @@ cognifyz-app/
         └── style.css  ← all styles
 ```
 
-## How to Run
+-> How to Run
 ```bash
 npm install       # install dependencies
 npm start         # start server at http://localhost:3000
@@ -42,9 +42,8 @@ npm run dev
 | GET    | /users      | Lists all registered users           |
 | GET    | /success    | Shows success page after registering |
 
-## Task 1 Requirements Covered
+## Requirements Covered
 - ✅ HTML structure with forms for user input
 - ✅ Node.js server using Express
 - ✅ Server-side endpoints to handle form submissions
 - ✅ Server-side rendering using EJS
-# STUDY-TRACKER-APP

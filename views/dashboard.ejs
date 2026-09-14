@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %> | StudyTracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <nav class="navbar px-4 py-3">
+    <span class="logo">⚡ StudyTracker</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="/" class="nav-link-custom">+ Log Session</a>
+      <a href="/users" class="nav-link-custom">All Sessions</a>
+    </div>
+  </nav>
+
+  <main class="container py-5" style="position:relative;z-index:5;">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-9">
+
+        <!-- STATS ROW -->
+        <div class="row g-3 mb-4" id="stats-row">
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <p class="stat-label">Total Sessions</p>
+              <h2 class="stat-value" id="stat-total">—</h2>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <p class="stat-label">Avg Hours</p>
+              <h2 class="stat-value" id="stat-hours">—</h2>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <p class="stat-label">Avg Stress</p>
+              <h2 class="stat-value" id="stat-stress">—</h2>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card">
+              <p class="stat-label">Top Subject</p>
+              <h2 class="stat-value" id="stat-subject" style="font-size:1rem;">—</h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- SESSION CARDS -->
+        <div class="table-card animate-in">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <div>
+              <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;">Live Sessions</h2>
+              <p style="color:var(--muted);font-size:0.85rem;">fetched from /api/sessions</p>
+            </div>
+            <button class="btn-refresh" onclick="loadSessions()">↻ Refresh</button>
+          </div>
+
+          <div id="loading" style="text-align:center;color:var(--muted);padding:2rem;">Loading...</div>
+          <div id="session-grid" class="session-grid" style="display:none;"></div>
+          <div id="empty-msg" style="display:none;" class="empty-state">
+            <p>No sessions yet. <a href="/">Log one!</a></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function loadSessions() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('session-grid').style.display = 'none';
+      document.getElementById('empty-msg').style.display = 'none';
+
+      try {
+        // fetch from our own REST API
+        const res = await fetch('/api/sessions');
+        const json = await res.json();
+        const sessions = json.data;
+
+        // update stats
+        document.getElementById('stat-total').textContent = sessions.length;
+
+        if (sessions.length > 0) {
+          const avgHours = (sessions.reduce((a, b) => a + parseFloat(b.hours), 0) / sessions.length).toFixed(1);
+          const avgStress = (sessions.reduce((a, b) => a + parseFloat(b.stress), 0) / sessions.length).toFixed(1);
+
+          // find most common subject
+          const subjectCount = {};
+          sessions.forEach(s => subjectCount[s.subject] = (subjectCount[s.subject] || 0) + 1);
+          const topSubject = Object.entries(subjectCount).sort((a, b) => b[1] - a[1])[0][0];
+
+          document.getElementById('stat-hours').textContent = avgHours + 'h';
+          document.getElementById('stat-stress').textContent = avgStress + '/10';
+          document.getElementById('stat-subject').textContent = topSubject;
+
+          // render session cards
+          const grid = document.getElementById('session-grid');
+          grid.innerHTML = sessions.map(s => `
+            <div class="session-card" id="card-${s.id}">
+              <div class="session-top">
+                <span class="session-name">${s.studentName}</span>
+                <button class="delete-btn" onclick="deleteSession(${s.id})">✕</button>
+              </div>
+              <p class="session-subject">${s.subject}</p>
+              <div class="session-meta">
+                <span>⏱ ${s.hours}h</span>
+                <span>😓 ${s.stress}/10</span>
+              </div>
+            </div>
+          `).join('');
+
+          document.getElementById('loading').style.display = 'none';
+          grid.style.display = 'grid';
+        } else {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('empty-msg').style.display = 'block';
+        }
+
+      } catch (err) {
+        document.getElementById('loading').textContent = 'Error loading sessions.';
+      }
+    }
+
+    async function deleteSession(id) {
+      try {
+        const res = await fetch('/api/sessions/' + id, { method: 'DELETE' });
+        const json = await res.json();
+        if (json.success) {
+          // remove card from DOM without page reload
+          const card = document.getElementById('card-' + id);
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.8)';
+          setTimeout(() => { card.remove(); loadSessions(); }, 300);
+        }
+      } catch (err) {
+        console.error('Delete failed', err);
+      }
+    }
+
+    // load on page open
+    loadSessions();
+  </script>
+</body>
+</html>

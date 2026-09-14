@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %> | StudyTracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+<nav class="navbar px-4 py-3">
+  <span class="logo">⚡ StudyTracker</span>
+
+  <div style="display:flex; gap:1rem;">
+    <a href="/users" class="nav-link-custom">View Sessions →</a>
+    <a href="/dashboard" class="nav-link-custom">📊 Dashboard</a>
+  </div>
+</nav>
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-7 col-lg-5">
+
+      <!-- TAB BUTTONS (client-side routing) -->
+      <div class="tabs-row">
+        <button class="tab-btn active" data-tab="tab-form">📝 Log Session</button>
+        <button class="tab-btn" data-tab="tab-tips">💡 Study Tips</button>
+      </div>
+
+      <!-- TAB 1: FORM -->
+      <div id="tab-form" class="tab-panel active">
+        <div class="glass-card animate-in">
+          <div class="card-badge">📚 Daily Log</div>
+          <h1 class="card-title">Daily Study<br/>Tracker</h1>
+          <p class="card-sub">Track your habits. Own your progress.</p>
+
+          <% if (error) { %>
+            <div class="alert-custom error"><%= error %></div>
+          <% } %>
+          <div id="client-error" class="alert-custom error" style="display:none"></div>
+
+          <form action="/submit-study-data" method="POST" class="mt-4">
+
+            <div class="field-group">
+              <label>Student Name <span id="name-counter" style="float:right;font-size:0.75rem;"></span></label>
+              <input type="text" id="studentName" name="studentName" placeholder="Enter your name" required />
+            </div>
+
+            <div class="field-group">
+              <label>Main Subject Studied</label>
+              <input type="text" id="subject" name="subject" placeholder="Physics / Coding / Math" required />
+            </div>
+
+            <div class="field-group">
+              <label>Study Hours Today <span id="hours-label" style="float:right;font-size:0.75rem;color:var(--muted)"></span></label>
+              <input type="number" id="hours" name="hours" placeholder="4" min="0" max="24" required />
+              <div class="progress-track">
+                <div id="hours-bar" class="progress-fill"></div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label>
+                Stress Level (1–10)
+                <span style="float:right;display:flex;align-items:center;gap:6px;">
+                  <span id="stress-dot" style="width:10px;height:10px;border-radius:50%;background:var(--muted);display:inline-block;transition:background 0.3s;"></span>
+                  <span id="stress-text" style="font-size:0.75rem;color:var(--muted);"></span>
+                </span>
+              </label>
+              <input type="number" id="stress" name="stress" placeholder="7" min="1" max="10" required />
+            </div>
+
+            <button type="submit" class="btn-submit mt-3">Save Today's Progress →</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB 2: STUDY TIPS (no page reload — pure DOM) -->
+      <div id="tab-tips" class="tab-panel">
+        <div class="glass-card animate-in">
+          <div class="card-badge">💡 Tips</div>
+          <h1 class="card-title">Study<br/>Smarter</h1>
+          <p class="card-sub">Evidence-based techniques that actually work.</p>
+          <div class="tips-list mt-4">
+            <div class="tip-item">
+              <span class="tip-icon">🍅</span>
+              <div><strong>Pomodoro Technique</strong><p>25 min focus, 5 min break. Repeat 4x then take a long break.</p></div>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon">🧠</span>
+              <div><strong>Active Recall</strong><p>Test yourself instead of re-reading. Way more effective.</p></div>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon">😴</span>
+              <div><strong>Sleep = Memory</strong><p>Your brain consolidates learning during sleep. Don't skip it.</p></div>
+            </div>
+            <div class="tip-item">
+              <span class="tip-icon">📵</span>
+              <div><strong>Kill Distractions</strong><p>Phone face down, notifications off. Even 1 glance costs 20 min focus.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // --- LIVE CHARACTER COUNTER ---
+  const nameInput = document.getElementById('studentName');
+  const nameCounter = document.getElementById('name-counter');
+
+  nameInput.addEventListener('input', function() {
+    const len = this.value.trim().length;
+    nameCounter.textContent = len + ' chars';
+    nameCounter.style.color = len < 2 ? '#ff6b6b' : '#6bffb8';
+  });
+
+  // --- HOURS PROGRESS BAR ---
+  const hoursInput = document.getElementById('hours');
+  const hoursBar = document.getElementById('hours-bar');
+  const hoursLabel = document.getElementById('hours-label');
+
+  hoursInput.addEventListener('input', function() {
+    const val = Math.min(Math.max(this.value, 0), 24);
+    const pct = (val / 24) * 100;
+    hoursBar.style.width = pct + '%';
+    if (pct < 33) hoursBar.style.background = '#ff6acd';
+    else if (pct < 66) hoursBar.style.background = '#f9ca24';
+    else hoursBar.style.background = '#6bffb8';
+    hoursLabel.textContent = val + 'h / 24h';
+  });
+
+  // --- STRESS COLOR INDICATOR ---
+  const stressInput = document.getElementById('stress');
+  const stressDot = document.getElementById('stress-dot');
+  const stressText = document.getElementById('stress-text');
+
+  stressInput.addEventListener('input', function() {
+    const val = parseInt(this.value);
+    if (val <= 3) {
+      stressDot.style.background = '#6bffb8';
+      stressText.textContent = 'Low stress 😊';
+      stressText.style.color = '#6bffb8';
+    } else if (val <= 6) {
+      stressDot.style.background = '#f9ca24';
+      stressText.textContent = 'Moderate stress 😐';
+      stressText.style.color = '#f9ca24';
+    } else {
+      stressDot.style.background = '#ff6b6b';
+      stressText.textContent = 'High stress 😓';
+      stressText.style.color = '#ff6b6b';
+    }
+  });
+
+  // --- CLIENT-SIDE TAB ROUTING ---
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById(this.dataset.tab).classList.add('active');
+      window.location.hash = this.dataset.tab;
+    });
+  });
+
+  // restore tab from URL hash
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    const target = document.querySelector(`[data-tab="${hash}"]`);
+    if (target) target.click();
+  }
+
+  // --- FORM VALIDATION ---
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const name = nameInput.value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const hours = hoursInput.value;
+    const stress = stressInput.value;
+    const errors = [];
+
+    if (name.length < 2) errors.push('Name must be at least 2 characters');
+    if (subject.length < 2) errors.push('Subject must be at least 2 characters');
+    if (hours < 0 || hours > 24) errors.push('Study hours must be between 0 and 24');
+    if (stress < 1 || stress > 10) errors.push('Stress level must be between 1 and 10');
+
+    if (errors.length > 0) {
+      e.preventDefault();
+      const el = document.getElementById('client-error');
+      el.innerHTML = errors.map(err => `<p>⚠ ${err}</p>`).join('');
+      el.style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>

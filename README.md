@@ -47,3 +47,4 @@ npm run dev
 - ✅ Node.js server using Express
 - ✅ Server-side endpoints to handle form submissions
 - ✅ Server-side rendering using EJS
+# STUDY-TRACKER-APP

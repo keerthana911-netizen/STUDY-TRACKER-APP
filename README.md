@@ -1,3 +1,11 @@
+🔗 **Live Demo:**
+- [Log a session](https://study-tracker-app-12lw.onrender.com) — main form
+- [All sessions](https://study-tracker-app-12lw.onrender.com/users) — full sessions table
+- [Dashboard](https://study-tracker-app-12lw.onrender.com/dashboard) — live stats view
+- [Raw API](https://study-tracker-app-12lw.onrender.com/api/sessions) — JSON response
+
+⚠️ *Free Render tier — first load may take 30–50s if the server has been idle.*
+
 # ⚡ StudyTracker
 
 A full-stack Node.js + Express web app for logging study sessions — subject, hours studied, and stress level — with both a styled server-rendered UI and a REST API.
